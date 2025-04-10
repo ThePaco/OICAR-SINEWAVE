@@ -1,13 +1,12 @@
-package hr.spring.web.sinewave.sinewaveapp;
+package hr.spring.web.sinewave;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SinewaveAppApplication {
+public class SinewaveApp {
 
     public static void main(String[] args) {
-        SpringApplication.run(SinewaveAppApplication.class, args);
+        SpringApplication.run(SinewaveApp.class, args);
     }
-
 }

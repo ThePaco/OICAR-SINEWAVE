@@ -3,6 +3,7 @@ package hr.spring.web.sinewave.controller;
 import hr.spring.web.sinewave.dto.UserCreateDto;
 import hr.spring.web.sinewave.dto.UserDto;
 import hr.spring.web.sinewave.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,13 +32,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody UserCreateDto dto) {
+    public ResponseEntity<UserDto> createUser(@Valid  @RequestBody UserCreateDto dto) {
         UserDto created = userService.create(dto);
         return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Integer id, @RequestBody UserCreateDto dto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable Integer id, @Valid @RequestBody UserCreateDto dto) {
         UserDto updated = userService.update(id, dto);
         return updated != null
                 ? ResponseEntity.ok(updated)

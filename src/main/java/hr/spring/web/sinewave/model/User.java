@@ -28,6 +28,9 @@ public class User {
     @Column(name = "passwordhash", nullable = false, length = Integer.MAX_VALUE)
     private String passwordhash;
 
+    @Column(name = "passwordsalt", nullable = false, length = Integer.MAX_VALUE)
+    private String passwordsalt;
+
     @Column(name = "profilepicture", length = Integer.MAX_VALUE)
     private String profilepicture;
 
@@ -95,6 +98,14 @@ public class User {
 
     public void setPasswordhash(String passwordhash) {
         this.passwordhash = passwordhash;
+    }
+
+    public String getPasswordsalt() {
+        return passwordsalt;
+    }
+
+    public void setPasswordsalt(String passwordsalt) {
+        this.passwordsalt = passwordsalt;
     }
 
     public String getProfilepicture() {

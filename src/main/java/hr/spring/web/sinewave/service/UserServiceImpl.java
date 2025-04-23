@@ -21,11 +21,13 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper, BCryptPasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Override
@@ -62,6 +64,8 @@ public class UserServiceImpl implements UserService {
         user.setPasswordhash(hashedPassword);
 
         User saved = userRepository.save(user);
+
+        emailService.sendAccountCreatedEmail(saved.getEmail(), saved.getUsername());
         return modelMapper.map(saved, UserDto.class);
     }
 

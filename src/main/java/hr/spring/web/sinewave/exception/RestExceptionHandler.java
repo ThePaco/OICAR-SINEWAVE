@@ -15,4 +15,11 @@ public class RestExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiError("AUTH_FAILED", ex.getMessage()));
     }
+
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleUsernameConflict(UsernameAlreadyExistsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new ApiError("USERNAME_TAKEN", ex.getMessage()));
+    }
 }

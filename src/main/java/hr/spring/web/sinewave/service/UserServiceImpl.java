@@ -4,6 +4,7 @@ import hr.spring.web.sinewave.dto.UserCreateDto;
 import hr.spring.web.sinewave.dto.UserDto;
 import hr.spring.web.sinewave.dto.UserLoginDto;
 import hr.spring.web.sinewave.exception.AuthenticationException;
+import hr.spring.web.sinewave.exception.UsernameAlreadyExistsException;
 import hr.spring.web.sinewave.model.User;
 import hr.spring.web.sinewave.repository.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -44,6 +45,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(UserCreateDto dto) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new UsernameAlreadyExistsException(dto.getUsername());
+        }
+
         User user = modelMapper.map(dto, User.class);
 
         SecureRandom random = new SecureRandom();
@@ -64,6 +69,11 @@ public class UserServiceImpl implements UserService {
     public UserDto update(Integer id, UserCreateDto dto) {
         return userRepository.findById(id)
                 .map(existing -> {
+                    if (!existing.getUsername().equals(dto.getUsername())
+                            && userRepository.existsByUsername(dto.getUsername())) {
+                        throw new UsernameAlreadyExistsException(dto.getUsername());
+                    }
+
                     modelMapper.map(dto, existing);
 
                     String hashed = passwordEncoder.encode(dto.getPassword());

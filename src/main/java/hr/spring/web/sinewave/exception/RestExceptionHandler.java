@@ -22,4 +22,11 @@ public class RestExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new ApiError("USERNAME_TAKEN", ex.getMessage()));
     }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiError> handleGenericException(Exception ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiError("SERVER_ERROR", "An unexpected error occurred"));
+    }
 }

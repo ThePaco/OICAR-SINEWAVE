@@ -31,6 +31,7 @@ public class Song {
     @JoinColumn(name = "albumid", nullable = false)
     private Album albumid;
 
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "genreid", nullable = false)

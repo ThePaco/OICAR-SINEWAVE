@@ -2,12 +2,16 @@ package hr.spring.web.sinewave.service;
 
 import hr.spring.web.sinewave.dto.PlaylistCreateDto;
 import hr.spring.web.sinewave.dto.PlaylistDto;
+import hr.spring.web.sinewave.dto.PlaylistSongDto;
+import hr.spring.web.sinewave.dto.SongDto;
 import hr.spring.web.sinewave.exception.ResourceNotFoundException;
 import hr.spring.web.sinewave.exception.UnauthorizedException;
-import hr.spring.web.sinewave.model.Playlist;
-import hr.spring.web.sinewave.model.User;
+import hr.spring.web.sinewave.model.*;
 import hr.spring.web.sinewave.repository.PlaylistRepository;
+import hr.spring.web.sinewave.repository.PlaylistSongRepository;
+import hr.spring.web.sinewave.repository.SongRepository;
 import hr.spring.web.sinewave.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,12 +25,16 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     private final PlaylistRepository playlistRepository;
     private final UserRepository userRepository;
+    private final SongRepository songRepository;
+    private final PlaylistSongRepository playlistSongRepository;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public PlaylistServiceImpl(PlaylistRepository playlistRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public PlaylistServiceImpl(PlaylistRepository playlistRepository, UserRepository userRepository, SongRepository songRepository, PlaylistSongRepository playlistSongRepository, ModelMapper modelMapper) {
         this.playlistRepository = playlistRepository;
         this.userRepository = userRepository;
+        this.songRepository = songRepository;
+        this.playlistSongRepository = playlistSongRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -124,5 +132,73 @@ public class PlaylistServiceImpl implements PlaylistService {
                 .orElseThrow(() -> new ResourceNotFoundException("Playlist not found with id: " + playlistId));
 
         return playlist.getCreatedby().getId().equals(userId);
+    }
+
+    @Override
+    @Transactional
+    public void addSongToPlaylist(PlaylistSongDto playlistSongDto, Integer userId) {
+        Playlist playlist = playlistRepository.findById(playlistSongDto.getPlaylistId())
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found with id: " + playlistSongDto.getPlaylistId()));
+
+        if (!isUserPlaylistOwner(playlistSongDto.getPlaylistId(), userId)) {
+            throw new UnauthorizedException("User is not authorized to add songs to this playlist");
+        }
+
+        Song song = songRepository.findById(playlistSongDto.getSongId())
+                .orElseThrow(() -> new ResourceNotFoundException("Song not found with id: " + playlistSongDto.getSongId()));
+
+        boolean songExists = playlistSongRepository.existsByPlaylistid_IdAndSongid_Id(
+                playlistSongDto.getPlaylistId(),
+                playlistSongDto.getSongId()
+        );
+
+        if (songExists) {
+            return;
+        }
+
+        Playlistsong playlistSong = new Playlistsong();
+        PlaylistsongId id = new PlaylistsongId();
+        id.setPlaylistid(playlistSongDto.getPlaylistId());
+        id.setSongid(playlistSongDto.getSongId());
+
+        playlistSong.setId(id);
+        playlistSong.setPlaylistid(playlist);
+        playlistSong.setSongid(song);
+        playlistSong.setAddedat(Instant.now());
+
+        playlistSongRepository.save(playlistSong);
+    }
+
+    @Override
+    @Transactional
+    public void removeSongFromPlaylist(PlaylistSongDto playlistSongDto, Integer userId) {
+        if (!playlistRepository.existsById(playlistSongDto.getPlaylistId())) {
+            throw new ResourceNotFoundException("Playlist not found with id: " + playlistSongDto.getPlaylistId());
+        }
+
+        if (!isUserPlaylistOwner(playlistSongDto.getPlaylistId(), userId)) {
+            throw new UnauthorizedException("User is not authorized to remove songs from this playlist");
+        }
+
+        playlistSongRepository.deleteByPlaylistid_IdAndSongid_Id(
+                playlistSongDto.getPlaylistId(),
+                playlistSongDto.getSongId()
+        );
+    }
+
+    @Override
+    public List<SongDto> getPlaylistSongs(Integer playlistId, Integer userId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResourceNotFoundException("Playlist not found with id: " + playlistId));
+
+        if (!playlist.getIspublic() && !isUserPlaylistOwner(playlistId, userId)) {
+            throw new UnauthorizedException("User is not authorized to view songs in this private playlist");
+        }
+
+        List<Playlistsong> playlistSongs = playlistSongRepository.findByPlaylistid_Id(playlistId);
+
+        return playlistSongs.stream()
+                .map(ps -> modelMapper.map(ps.getSongid(), SongDto.class))
+                .collect(Collectors.toList());
     }
 }

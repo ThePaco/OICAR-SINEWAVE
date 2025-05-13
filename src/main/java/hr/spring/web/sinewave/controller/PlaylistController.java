@@ -2,6 +2,8 @@ package hr.spring.web.sinewave.controller;
 
 import hr.spring.web.sinewave.dto.PlaylistCreateDto;
 import hr.spring.web.sinewave.dto.PlaylistDto;
+import hr.spring.web.sinewave.dto.PlaylistSongDto;
+import hr.spring.web.sinewave.dto.SongDto;
 import hr.spring.web.sinewave.exception.ResourceNotFoundException;
 import hr.spring.web.sinewave.model.User;
 import hr.spring.web.sinewave.repository.UserRepository;
@@ -91,6 +93,27 @@ public class PlaylistController {
     public ResponseEntity<Void> deletePlaylist(@PathVariable Integer id) {
         User currentUser = getCurrentUser();
         playlistService.deletePlaylist(id, currentUser.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/songs")
+    public ResponseEntity<List<SongDto>> getPlaylistSongs(@PathVariable Integer id) {
+        User currentUser = getCurrentUser();
+        List<SongDto> songs = playlistService.getPlaylistSongs(id, currentUser.getId());
+        return ResponseEntity.ok(songs);
+    }
+
+    @PostMapping("/songs")
+    public ResponseEntity<Void> addSongToPlaylist(@Valid @RequestBody PlaylistSongDto playlistSongDto) {
+        User currentUser = getCurrentUser();
+        playlistService.addSongToPlaylist(playlistSongDto, currentUser.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/songs")
+    public ResponseEntity<Void> removeSongFromPlaylist(@Valid @RequestBody PlaylistSongDto playlistSongDto) {
+        User currentUser = getCurrentUser();
+        playlistService.removeSongFromPlaylist(playlistSongDto, currentUser.getId());
         return ResponseEntity.noContent().build();
     }
 }

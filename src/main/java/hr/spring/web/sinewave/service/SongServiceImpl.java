@@ -112,6 +112,9 @@ public class SongServiceImpl implements SongService{
 
     @Override
     public List<SongDto> findByUserId(Integer userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found");
+        }
         return songRepository.findByUserid_Id(userId)
                 .stream()
                 .map(song -> modelMapper.map(song, SongDto.class))
@@ -120,6 +123,9 @@ public class SongServiceImpl implements SongService{
 
     @Override
     public List<SongDto> findByAlbumId(Integer albumId) {
+        if (!albumRepository.existsById(albumId)) {
+            throw new NotFoundException("Album not found");
+        }
         return songRepository.findByAlbumid_Id(albumId)
                 .stream()
                 .map(song -> modelMapper.map(song, SongDto.class))
@@ -128,6 +134,9 @@ public class SongServiceImpl implements SongService{
 
     @Override
     public List<SongDto> findByGenreId(Integer genreId) {
+        if (!genreRepository.existsById(genreId)) {
+            throw new NotFoundException("Genre not found");
+        }
         return songRepository.findByGenreid_Id(genreId)
                 .stream()
                 .map(song -> modelMapper.map(song, SongDto.class))

@@ -16,4 +16,5 @@ public interface SongService {
     List<SongDto> findByUserId(Integer userId);
     List<SongDto> findByAlbumId(Integer albumId);
     List<SongDto> findByGenreId(Integer genreId);
+    List<SongDto> searchByTitle(String title);
 }

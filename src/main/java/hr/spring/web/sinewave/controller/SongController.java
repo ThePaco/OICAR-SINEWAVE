@@ -46,6 +46,12 @@ public class SongController {
         return  ResponseEntity.ok(songService.findByUserId(id));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<SongDto>> searchByTitle(@RequestParam("title") String title) {
+        List<SongDto> songs = songService.searchByTitle(title);
+        return ResponseEntity.ok(songs);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SongDto> update(
             @PathVariable Integer id,

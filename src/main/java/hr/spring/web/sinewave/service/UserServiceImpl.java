@@ -105,4 +105,12 @@ public class UserServiceImpl implements UserService {
 
         return modelMapper.map(user, UserDto.class);
     }
+
+    @Override
+    public List<UserDto> searchByUsername(String username) {
+        List<User> users = userRepository.findByUsernameContainingIgnoreCase(username);
+        return users.stream()
+                .map(user -> modelMapper.map(user, UserDto.class))
+                .collect(Collectors.toList());
+    }
 }

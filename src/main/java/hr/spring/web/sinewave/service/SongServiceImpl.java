@@ -142,4 +142,28 @@ public class SongServiceImpl implements SongService{
                 .map(song -> modelMapper.map(song, SongDto.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<SongDto> searchByTitle(String title) {
+        List<Song> songs = songRepository.findByTitleContainingIgnoreCase(title);
+        return songs.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private SongDto convertToDto(Song song) {
+        SongDto dto = modelMapper.map(song, SongDto.class);
+
+        if (song.getUserid() != null) {
+            dto.setArtistName(song.getUserid().getFirstname() + " " + song.getUserid().getLastname());
+        }
+        if (song.getAlbumid() != null) {
+            dto.setAlbumName(song.getAlbumid().getName());
+        }
+        if (song.getGenreid() != null) {
+            dto.setGenreName(song.getGenreid().getName());
+        }
+
+        return dto;
+    }
 }

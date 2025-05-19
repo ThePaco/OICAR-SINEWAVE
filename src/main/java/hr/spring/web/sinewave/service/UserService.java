@@ -13,4 +13,5 @@ public interface UserService {
     UserDto update(Integer id, UserCreateDto dto);
     void delete(Integer id);
     UserDto authenticateUser(UserLoginDto dto);
+    List<UserDto> searchByUsername(String username);
 }

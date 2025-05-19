@@ -14,4 +14,8 @@ public class SongDto {
     private Long duration;
     private String filepath;
     private Instant createdAt;
+
+    private String artistName;
+    private String genreName;
+    private String albumName;
 }

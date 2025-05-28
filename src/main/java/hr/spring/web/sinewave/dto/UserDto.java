@@ -1,5 +1,6 @@
 package hr.spring.web.sinewave.dto;
 
+import hr.spring.web.sinewave.model.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,4 +15,5 @@ public class UserDto {
     private String lastname;
     private String email;
     private String profilepicture;
+    private Role role;
 }

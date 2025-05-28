@@ -1,5 +1,6 @@
 package hr.spring.web.sinewave.service;
 
+import hr.spring.web.sinewave.model.Role;
 import hr.spring.web.sinewave.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,10 +27,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
+        String authority = user.getRole() == Role.ADMIN ? "ROLE_ADMIN" : "ROLE_USER";
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPasswordhash(),
-                Collections.singletonList(new SimpleGrantedAuthority("USER"))
+                Collections.singletonList(new SimpleGrantedAuthority(authority))
         );
     }
 }

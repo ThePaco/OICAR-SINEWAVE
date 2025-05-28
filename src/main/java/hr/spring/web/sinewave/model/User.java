@@ -34,6 +34,10 @@ public class User {
     @Column(name = "profilepicture", length = Integer.MAX_VALUE)
     private String profilepicture;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role = Role.USER;
+
     @OneToMany(mappedBy = "userid")
     private Set<Album> albums = new LinkedHashSet<>();
 
@@ -52,6 +56,7 @@ public class User {
     @OneToMany(mappedBy = "friendid")
     private Set<Userfriend> receivedFriendRequests = new LinkedHashSet<>();
 
+    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -116,6 +121,14 @@ public class User {
         this.profilepicture = profilepicture;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public Set<Album> getAlbums() {
         return albums;
     }
@@ -163,5 +176,4 @@ public class User {
     public void setReceivedFriendRequests(Set<Userfriend> receivedFriendRequests) {
         this.receivedFriendRequests = receivedFriendRequests;
     }
-
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class JwtUtil {
     @Value("${jwt.secret:defaultSecretKeyWhichShouldBeChangedInProduction}")
     private String secret;
 
-    @Value("${jwt.expiration:1800000}")
+    @Value("${jwt.expiration:3600000}") // 1 sat
     private long jwtExpiration;
 
     public String extractUsername(String token) {
@@ -67,6 +68,11 @@ public class JwtUtil {
         claims.put("email", user.getEmail());
         claims.put("role", user.getRole().name());
         return createToken(claims, user.getUsername());
+    }
+
+    public String generateToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return createToken(claims, username);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {

@@ -35,15 +35,13 @@ public class SongServiceImpl implements SongService{
     private AlbumRepository albumRepository;
     private GenreRepository genreRepository;
     private UserRepository userRepository;
-    private final FileUploadService fileUploadService;
 
-    public SongServiceImpl(SongRepository songRepository, ModelMapper modelMapper, AlbumRepository albumRepository, GenreRepository genreRepository, UserRepository userRepository, FileUploadService fileUploadService) {
+    public SongServiceImpl(SongRepository songRepository, ModelMapper modelMapper, AlbumRepository albumRepository, GenreRepository genreRepository, UserRepository userRepository) {
         this.songRepository = songRepository;
         this.modelMapper = modelMapper;
         this.albumRepository = albumRepository;
         this.genreRepository = genreRepository;
         this.userRepository = userRepository;
-        this.fileUploadService = fileUploadService;
     }
 
     @Override

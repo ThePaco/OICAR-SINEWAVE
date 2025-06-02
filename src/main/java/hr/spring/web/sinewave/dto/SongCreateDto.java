@@ -14,9 +14,4 @@ public class SongCreateDto {
 
     private Integer albumId;
     private Integer genreId;
-
-    @NotNull
-    private Integer duration;
-
-    private String filepath;
 }

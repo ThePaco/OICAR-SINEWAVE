@@ -13,11 +13,20 @@ import hr.spring.web.sinewave.repository.GenreRepository;
 import hr.spring.web.sinewave.repository.SongRepository;
 import hr.spring.web.sinewave.repository.UserRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 @Service
 public class SongServiceImpl implements SongService{
@@ -52,11 +61,20 @@ public class SongServiceImpl implements SongService{
     }
 
     @Override
-    public SongDto create(SongCreateDto dto) {
+    public SongDto create(SongCreateDto dto, MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+
+        String relativePathForDb = "music/" + originalFilename;
+        try {
+            String filename = file.getOriginalFilename();
+            Path path = Paths.get("music/" + filename);
+            Files.copy(file.getInputStream(), path, REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store uploaded file: " + e.getMessage(), e);
+        }
         Song song = new Song();
         song.setTitle(dto.getTitle());
-        song.setDuration(dto.getDuration());
-        song.setFilepath(dto.getFilepath());
+        song.setFilepath(relativePathForDb);
         song.setCreatedat(Instant.now());
 
         User user = userRepository.findById(dto.getUserId())
@@ -95,7 +113,6 @@ public class SongServiceImpl implements SongService{
                     .orElseThrow(() -> new NotFoundException("Genre not found"));
             existing.setGenreid(genre);
         }
-        if (dto.getDuration() != null) existing.setDuration(dto.getDuration());
         if (dto.getFilepath() != null) existing.setFilepath(dto.getFilepath());
 
         Song updated = songRepository.save(existing);

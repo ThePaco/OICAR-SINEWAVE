@@ -37,9 +37,6 @@ public class Song {
     @JoinColumn(name = "genreid", nullable = false)
     private Genre genreid;
 
-    @Column(name = "duration", nullable = false)
-    private Integer duration;
-
     @Column(name = "filepath", nullable = false, length = Integer.MAX_VALUE)
     private String filepath;
 
@@ -91,14 +88,6 @@ public class Song {
 
     public void setGenreid(Genre genreid) {
         this.genreid = genreid;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
     }
 
     public String getFilepath() {

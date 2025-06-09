@@ -67,10 +67,13 @@ public class SongController {
     public ResponseEntity<SongDto> update(
             @PathVariable Integer id,
             @Valid @RequestBody SongUpdateDto dto
-    ) {
+    )
+    {
         SongDto updated = songService.update(id, dto);
         return ResponseEntity.ok(updated);
-    }@GetMapping("/stream/{id}") // Changed to path variable for ID
+    }
+
+    @GetMapping("/stream/{id}") // Changed to path variable for ID
     public ResponseEntity<InputStreamResource> streamMusicById(@PathVariable Integer id) throws IOException {
         SongDto songDto = songService.findById(id);
 
@@ -80,8 +83,6 @@ public class SongController {
 
         File file = new File(songDto.getFilepath());
 
-
-
         if (!file.exists() || !file.canRead()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -90,15 +91,14 @@ public class SongController {
         InputStreamResource resource = new InputStreamResource(inputStream);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("audio/mpeg")); // Or detect dynamically if you support other types
+        headers.setContentType(MediaType.parseMediaType("audio/mpeg"));
         headers.setContentLength(file.length());
-        headers.set("Accept-Ranges", "bytes"); // Important for seeking and partial content
-        // Optional: Suggest a filename for download
-        // headers.setContentDisposition(ContentDisposition.builder("inline").filename(file.getName()).build());
+        headers.set("Accept-Ranges", "bytes");
 
 
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
+
     @PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<?> createSongWithUpload(
             @RequestPart("file") MultipartFile file,

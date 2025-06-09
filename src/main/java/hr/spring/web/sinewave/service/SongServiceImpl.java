@@ -48,8 +48,8 @@ public class SongServiceImpl implements SongService{
     public List<SongDto> findAll() {
         List<Song> songs = songRepository.findAll();
                return songs.stream()
-                .map(song -> modelMapper.map(song, SongDto.class))
-                .collect(Collectors.toList());
+                       .map(this::convertToDto)
+                       .collect(Collectors.toList());
 
     }
 
@@ -57,7 +57,7 @@ public class SongServiceImpl implements SongService{
     public SongDto findById(Integer id) {
         Song song = songRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Song not found"));
-        return modelMapper.map(song, SongDto.class);
+        return convertToDto(song);
     }
 
     @Override

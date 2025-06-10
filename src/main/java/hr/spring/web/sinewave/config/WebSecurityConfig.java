@@ -47,6 +47,7 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/songs/**").permitAll()
                         .requestMatchers("/api/mobile/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )

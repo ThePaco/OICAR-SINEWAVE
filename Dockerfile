@@ -23,7 +23,8 @@ RUN mvn package -DskipTests -B
 
 # Stage 2: Create the runtime image
 # Use a slim OpenJDK runtime image for a smaller final image size
-FROM openjdk:21-jre-slim
+#FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre-jammy
 # FROM eclipse-temurin:21-jre-alpine # Even smaller, but might have compatibility issues with some native libs
 
 # Set the working directory in the container

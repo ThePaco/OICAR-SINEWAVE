@@ -14,4 +14,5 @@ public interface UserService {
     void delete(Integer id);
     UserDto authenticateUser(UserLoginDto dto);
     List<UserDto> searchByUsername(String username);
+    void anonymizeUser(Integer userId);
 }

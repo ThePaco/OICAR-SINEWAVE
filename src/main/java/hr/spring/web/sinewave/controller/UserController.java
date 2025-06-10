@@ -15,9 +15,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/users")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
@@ -76,6 +78,32 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Integer id) {
         userService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/anonymize-me")
+    public ResponseEntity<Map<String, String>> anonymizeCurrentUser() {
+        try {
+            User currentUser = getCurrentUserFromContext();
+
+            if (currentUser.getIsAnonymized()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Account is already anonymized"));
+            }
+
+            userService.anonymizeUser(currentUser.getId());
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Your account has been successfully anonymized. You will be logged out shortly.",
+                    "status", "success"
+            ));
+
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(404)
+                    .body(Map.of("message", "User not found"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("message", "An error occurred while processing your request"));
+        }
     }
 
     private User getCurrentUserFromContext() {

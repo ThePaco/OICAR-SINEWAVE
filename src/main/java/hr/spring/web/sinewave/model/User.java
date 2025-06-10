@@ -2,6 +2,7 @@ package hr.spring.web.sinewave.model;
 
 import jakarta.persistence.*;
 
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -38,6 +39,12 @@ public class User {
     @Column(name = "role", nullable = false)
     private Role role = Role.USER;
 
+    @Column(name = "is_anonymized", nullable = false)
+    private Boolean isAnonymized = false;
+
+    @Column(name = "anonymized_at")
+    private Instant anonymizedAt;
+
     @OneToMany(mappedBy = "userid")
     private Set<Album> albums = new LinkedHashSet<>();
 
@@ -56,7 +63,6 @@ public class User {
     @OneToMany(mappedBy = "friendid")
     private Set<Userfriend> receivedFriendRequests = new LinkedHashSet<>();
 
-    // Getters and Setters
     public Integer getId() {
         return id;
     }
@@ -127,6 +133,22 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Boolean getIsAnonymized() {
+        return isAnonymized;
+    }
+
+    public void setIsAnonymized(Boolean isAnonymized) {
+        this.isAnonymized = isAnonymized;
+    }
+
+    public Instant getAnonymizedAt() {
+        return anonymizedAt;
+    }
+
+    public void setAnonymizedAt(Instant anonymizedAt) {
+        this.anonymizedAt = anonymizedAt;
     }
 
     public Set<Album> getAlbums() {

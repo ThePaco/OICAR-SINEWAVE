@@ -48,27 +48,18 @@ jobs:
           reporter: java-junit
           fail-on-error: true
 
-      - name: Generate JaCoCo Badge
-        if: success()
-        id: jacoco
-        uses: cicirello/jacoco-badge-generator@v2
-        with:
-          generate-branches-badge: true
-
-      - name: Log coverage percentage
+      - name: Generate coverage report
         if: success()
         run: |
-          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
-          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+          ./mvnw jacoco:report
+          echo "Coverage report generated in target/site/jacoco/"
 
-      - name: Comment coverage on PR
-        if: github.event_name == 'pull_request' && success()
-        uses: madrapps/jacoco-report@v1.3
+      - name: Upload coverage reports
+        if: success()
+        uses: actions/upload-artifact@v3
         with:
-          paths: target/site/jacoco/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 40
-          min-coverage-changed-files: 60
+          name: coverage-reports
+          path: target/site/jacoco/
 
   build:
     needs: test

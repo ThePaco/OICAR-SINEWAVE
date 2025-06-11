@@ -14,16 +14,16 @@ public class User {
     @Column(name = "id", nullable = false, updatable = false, insertable = false)
     private Integer id;
 
-    @Column(name = "username", nullable = false, length = 100)
+    @Column(name = "username", nullable = false, length = 255)
     private String username;
 
-    @Column(name = "firstname", nullable = false, length = 60)
+    @Column(name = "firstname", nullable = false, length = 255)
     private String firstname;
 
-    @Column(name = "lastname", nullable = false, length = 60)
+    @Column(name = "lastname", nullable = false, length = 255)
     private String lastname;
 
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", nullable = false, length = 255)
     private String email;
 
     @Column(name = "passwordhash", nullable = false, length = Integer.MAX_VALUE)

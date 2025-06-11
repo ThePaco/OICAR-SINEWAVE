@@ -2,7 +2,6 @@ package hr.spring.web.sinewave.controller;
 
 import hr.spring.web.sinewave.config.JwtUtil;
 import hr.spring.web.sinewave.dto.AuthResponseDto;
-import hr.spring.web.sinewave.dto.RefreshTokenRequestDto;
 import hr.spring.web.sinewave.dto.UserCreateDto;
 import hr.spring.web.sinewave.dto.UserDto;
 import hr.spring.web.sinewave.dto.UserLoginDto;

@@ -27,6 +27,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
       - name: Create required directories
         run: |
           mkdir -p test-music
@@ -34,10 +37,35 @@ jobs:
           chmod 755 test-music music
 
       - name: Run unit tests
-        run: mvn clean test -Dspring.profiles.active=test
+        run: ./mvnw clean test -Dspring.profiles.active=test
         env:
           JWT_SECRET: testSecretKeyForCIEnvironment123456789012345678901234567890
           SPRING_PROFILES_ACTIVE: test
+
+      - name: Show test results
+        if: always()
+        run: |
+          echo "=== TEST RESULTS SUMMARY ==="
+          if [ -d "target/surefire-reports" ]; then
+            echo "Test reports found:"
+            find target/surefire-reports -name "*.xml" -exec basename {} \; | head -10
+          
+            # Count tests
+            if [ -f target/surefire-reports/TEST-*.xml ]; then
+              TESTS=$(grep -h 'testcase' target/surefire-reports/TEST-*.xml | wc -l || echo "0")
+              FAILURES=$(grep -h 'failure\|error' target/surefire-reports/TEST-*.xml | wc -l || echo "0")
+              echo "Total tests: $TESTS"
+              echo "Failures: $FAILURES"
+          
+              if [ "$FAILURES" -eq 0 ]; then
+                echo "All tests passed!"
+              else
+                echo "Some tests failed"
+              fi
+            fi
+          else
+            echo "No test reports found"
+          fi
 
       - name: Generate coverage report
         if: success()
@@ -45,12 +73,16 @@ jobs:
           ./mvnw jacoco:report
           echo "Coverage report generated in target/site/jacoco/"
 
-      - name: Upload coverage reports
-        if: success()
+      - name: Upload test and coverage reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-reports
-          path: target/site/jacoco/
+          name: test-and-coverage-reports-${{ github.run_number }}
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
+          retention-days: 7
+          if-no-files-found: warn
 
   build:
     needs: test
@@ -67,5 +99,15 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Make mvnw executable
+        run: chmod +x ./mvnw
+
       - name: Build application
-        run: mvn clean package -DskipTests
+        run: ./mvnw clean package -DskipTests
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
+          path: target/*.jar
+          retention-days: 7

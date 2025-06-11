@@ -87,15 +87,18 @@ class PlaylistControllerTest {
         playlistSongDto.setSongId(1);
 
         securityContextHolderMock = mockStatic(SecurityContextHolder.class);
-        securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("testuser");
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
     }
 
     @AfterEach
     void tearDown() {
         securityContextHolderMock.close();
+    }
+
+    private void setupSecurityContext() {
+        securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
     }
 
     @Test
@@ -114,6 +117,7 @@ class PlaylistControllerTest {
 
     @Test
     void testGetUserPlaylists_Success() {
+        setupSecurityContext();
         List<PlaylistDto> playlists = Arrays.asList(playlistDto);
         when(playlistService.getUserPlaylists(1)).thenReturn(playlists);
 
@@ -154,6 +158,7 @@ class PlaylistControllerTest {
 
     @Test
     void testCreatePlaylist_Success() {
+        setupSecurityContext();
         when(playlistService.createPlaylist(any(PlaylistCreateDto.class), eq(1))).thenReturn(playlistDto);
 
         ResponseEntity<PlaylistDto> result = playlistController.createPlaylist(playlistCreateDto);
@@ -166,18 +171,27 @@ class PlaylistControllerTest {
 
     @Test
     void testUpdatePlaylist_Success() {
-        playlistDto.setName("Updated Playlist");
-        when(playlistService.updatePlaylist(eq(1), any(PlaylistCreateDto.class), eq(1))).thenReturn(playlistDto);
+        setupSecurityContext();
+        PlaylistDto updatedPlaylistDto = new PlaylistDto();
+        updatedPlaylistDto.setId(1);
+        updatedPlaylistDto.setName("Updated Playlist");
+        updatedPlaylistDto.setCreatedBy(userDto);
+        updatedPlaylistDto.setCreatedAt(Instant.now());
+        updatedPlaylistDto.setIsPublic(false);
+        updatedPlaylistDto.setSongCount(0);
+
+        when(playlistService.updatePlaylist(eq(1), any(PlaylistCreateDto.class), eq(1))).thenReturn(updatedPlaylistDto);
 
         ResponseEntity<PlaylistDto> result = playlistController.updatePlaylist(1, playlistCreateDto);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(result.getBody());
-        assertEquals("Test Playlist", result.getBody().getName());
+        assertEquals("Updated Playlist", result.getBody().getName());
     }
 
     @Test
     void testDeletePlaylist_Success() {
+        setupSecurityContext();
         doNothing().when(playlistService).deletePlaylist(1, 1);
 
         ResponseEntity<Void> result = playlistController.deletePlaylist(1);
@@ -187,6 +201,7 @@ class PlaylistControllerTest {
 
     @Test
     void testAddSongToPlaylist_Success() {
+        setupSecurityContext();
         doNothing().when(playlistService).addSongToPlaylist(any(PlaylistSongDto.class), eq(1));
 
         ResponseEntity<Void> result = playlistController.addSongToPlaylist(playlistSongDto);
@@ -196,6 +211,7 @@ class PlaylistControllerTest {
 
     @Test
     void testRemoveSongFromPlaylist_Success() {
+        setupSecurityContext();
         doNothing().when(playlistService).removeSongFromPlaylist(any(PlaylistSongDto.class), eq(1));
 
         ResponseEntity<Void> result = playlistController.removeSongFromPlaylist(playlistSongDto);
@@ -205,6 +221,7 @@ class PlaylistControllerTest {
 
     @Test
     void testGetPlaylistSongs_Success() {
+        setupSecurityContext();
         SongDto songDto = new SongDto();
         songDto.setId(1);
         songDto.setTitle("Test Song");

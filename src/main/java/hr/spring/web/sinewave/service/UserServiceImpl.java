@@ -8,6 +8,8 @@ import hr.spring.web.sinewave.exception.ResourceNotFoundException;
 import hr.spring.web.sinewave.exception.UsernameAlreadyExistsException;
 import hr.spring.web.sinewave.model.User;
 import hr.spring.web.sinewave.repository.UserRepository;
+import hr.spring.web.sinewave.util.EncryptionUtil;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll()
                 .stream()
                 .filter(user -> !user.getIsAnonymized())
-                .map(user -> modelMapper.map(user, UserDto.class))
+                .map(this::mapUserToUserDto)
                 .collect(Collectors.toList());
     }
 
@@ -49,7 +51,7 @@ public class UserServiceImpl implements UserService {
     public UserDto getById(Integer id) {
         return userRepository.findById(id)
                 .filter(user -> !user.getIsAnonymized())
-                .map(user -> modelMapper.map(user, UserDto.class))
+                .map(this::mapUserToUserDto)
                 .orElse(null);
     }
 
@@ -59,7 +61,12 @@ public class UserServiceImpl implements UserService {
             throw new UsernameAlreadyExistsException(dto.getUsername());
         }
 
-        User user = modelMapper.map(dto, User.class);
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setFirstname(EncryptionUtil.encrypt(dto.getFirstname()));
+        user.setLastname(EncryptionUtil.encrypt(dto.getLastname()));
+        user.setEmail(EncryptionUtil.encrypt(dto.getEmail()));
+        user.setProfilepicture(dto.getProfilepicture());
 
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
@@ -73,14 +80,14 @@ public class UserServiceImpl implements UserService {
 
         User saved = userRepository.save(user);
 
-        emailService.sendAccountCreatedEmail(saved.getEmail(), saved.getUsername());
-        return modelMapper.map(saved, UserDto.class);
+        emailService.sendAccountCreatedEmail(dto.getEmail(), dto.getUsername());
+        return mapUserToUserDto(saved);
     }
 
     @Override
     public UserDto update(Integer id, UserCreateDto dto) {
         return userRepository.findById(id)
-                .filter(user -> !user.getIsAnonymized()) // Ne dozvoljavaj update anonimiziranih
+                .filter(user -> !user.getIsAnonymized())
                 .map(existing -> {
                     if (!existing.getUsername().equals(dto.getUsername())
                             && userRepository.existsByUsername(dto.getUsername())) {
@@ -116,7 +123,7 @@ public class UserServiceImpl implements UserService {
             throw new AuthenticationException("Invalid username or password");
         }
 
-        return modelMapper.map(user, UserDto.class);
+        return mapUserToUserDto(user);
     }
 
     @Override
@@ -124,7 +131,7 @@ public class UserServiceImpl implements UserService {
         List<User> users = userRepository.findByUsernameContainingIgnoreCase(username);
         return users.stream()
                 .filter(user -> !user.getIsAnonymized())
-                .map(user -> modelMapper.map(user, UserDto.class))
+                .map(this::mapUserToUserDto)
                 .collect(Collectors.toList());
     }
 
@@ -140,8 +147,7 @@ public class UserServiceImpl implements UserService {
         String timestamp = String.valueOf(System.currentTimeMillis());
         String anonymousId = "anonymous_user_" + timestamp;
 
-        String originalEmail = user.getEmail();
-        String originalUsername = user.getUsername();
+        String originalUsername = EncryptionUtil.decrypt(user.getUsername());
 
         user.setUsername(anonymousId);
         user.setFirstname("Anonymous");
@@ -160,6 +166,23 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             System.err.println("Failed to delete refresh tokens for user: " + originalUsername);
         }
+    }
 
+    private UserDto mapUserToUserDto(User user) {
+        if (user == null) return null;
+        UserDto dto = new UserDto();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        try {
+            dto.setFirstname(EncryptionUtil.decrypt(user.getFirstname()));
+            dto.setLastname(EncryptionUtil.decrypt(user.getLastname()));
+            dto.setEmail(EncryptionUtil.decrypt(user.getEmail()));
+        } catch (RuntimeException e) {
+            System.err.println("Decryption error for user ID " + user.getId() + ": " + e.getMessage());
+            dto.setUsername("[decryption error]");
+        }
+        dto.setProfilepicture(user.getProfilepicture());
+        dto.setRole(user.getRole());
+        return dto;
     }
 }

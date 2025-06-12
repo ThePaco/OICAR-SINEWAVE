@@ -49,6 +49,8 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/songs/**").permitAll()
                         .requestMatchers("/api/mobile/auth/**").permitAll()
+                        .requestMatchers("/api/albums/**").permitAll()
+                        .requestMatchers("/api/genres/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

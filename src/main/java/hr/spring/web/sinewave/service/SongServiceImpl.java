@@ -12,6 +12,7 @@ import hr.spring.web.sinewave.repository.AlbumRepository;
 import hr.spring.web.sinewave.repository.GenreRepository;
 import hr.spring.web.sinewave.repository.SongRepository;
 import hr.spring.web.sinewave.repository.UserRepository;
+import hr.spring.web.sinewave.util.EncryptionUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -172,7 +173,7 @@ public class SongServiceImpl implements SongService{
         SongDto dto = modelMapper.map(song, SongDto.class);
 
         if (song.getUserid() != null) {
-            dto.setArtistName(song.getUserid().getFirstname() + " " + song.getUserid().getLastname());
+            dto.setArtistName(EncryptionUtil.decrypt(song.getUserid().getFirstname()) + " " + EncryptionUtil.decrypt(song.getUserid().getLastname()));
         }
         if (song.getAlbumid() != null) {
             dto.setAlbumName(song.getAlbumid().getName());
